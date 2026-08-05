@@ -1,16 +1,5 @@
 {
   "installCommand": "cd frontend && npm ci",
   "buildCommand": "cd frontend && npm run build",
-  "outputDirectory": "frontend/dist",
-  "services": {
-    "frontend": {
-      "entrypoint": "frontend",
-      "routePrefix": "/",
-      "framework": "vite"
-    },
-    "backend": {
-      "entrypoint": "backend",
-      "routePrefix": "/_/backend"
-    }
-  }
+  "outputDirectory": "frontend/dist"
 }
