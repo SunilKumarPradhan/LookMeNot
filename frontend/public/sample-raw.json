@@ -1,0 +1,28 @@
+{
+  "messages": [
+    { "role": "system", "content": "You are AEGIS, a security recon assistant. Prefer safe, read-only commands." },
+    { "role": "user", "content": "Where is the **AEGIS** config folder? Search the repo and read the main config." },
+    { "role": "assistant", "content": [
+      { "type": "thinking", "text": "I should search the filesystem for anything named aegis, then read its main config file. Start broad, then narrow." },
+      { "type": "text", "text": "Let me search for AEGIS-related paths first." },
+      { "type": "tool_use", "id": "tu_1", "name": "Bash", "input": { "command": "find / -iname '*aegis*' 2>/dev/null" } }
+    ]},
+    { "role": "user", "content": [
+      { "type": "tool_result", "tool_use_id": "tu_1", "is_error": false,
+        "content": "/opt/aegis\n/opt/aegis/config\n/opt/aegis/config/app.yaml\n(13 matches total)" }
+    ]},
+    { "role": "assistant", "content": [
+      { "type": "text", "text": "Found it. Reading the main config now." },
+      { "type": "tool_use", "id": "tu_2", "name": "Read", "input": { "file_path": "/opt/aegis/config/app.yaml" } }
+    ]},
+    { "role": "user", "content": [
+      { "type": "tool_result", "tool_use_id": "tu_2", "is_error": true,
+        "content": "Error: permission denied reading /opt/aegis/config/app.yaml" }
+    ]},
+    { "role": "assistant", "content": [
+      { "type": "thinking", "text": "Permission denied — the file is likely root-owned. I'll present options rather than force sudo." },
+      { "type": "text", "text": "The config exists but I hit a **permission error**:\n\n- **Path:** `/opt/aegis/config/app.yaml`\n- **Cause:** file appears to be root-owned\n\n| Option | Action | Risk |\n|---|---|---|\n| A | Re-run with elevated permissions | medium |\n| B | Change file ownership | higher |\n\nSuggested command:\n\n```bash\nsudo cat /opt/aegis/config/app.yaml\n```\n\nHow would you like to proceed?" }
+    ]},
+    { "role": "user", "content": "Use option A." }
+  ]
+}

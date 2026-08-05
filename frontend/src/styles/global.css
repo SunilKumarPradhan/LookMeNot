@@ -1,0 +1,296 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap");
+
+:root {
+  --bg: #121214;
+  --bg-elevated: #18181b;
+  --bubble-user: #1e1e22;
+  --bubble-assistant: #16343d;
+  --bubble-assistant-border: #2a6f7f;
+  --bubble-thinking: #1a1a1d;
+  --bubble-tool-use: #2a2116;
+  --bubble-tool-use-border: #b8862f;
+  --bubble-tool-result-ok: #16241a;
+  --bubble-tool-result-ok-border: #3f9a56;
+  --bubble-tool-result-err: #2a1618;
+  --bubble-tool-result-err-border: #c14b4b;
+  --text-primary: #e7e7ea;
+  --text-muted: #9a9aa2;
+  --text-dim: #6f6f78;
+  --accent: #4fb3c9;
+  --border: #2b2b30;
+  --danger: #e5696f;
+  --warning: #f2a93b;
+  --ok: #5ec98a;
+  --radius: 10px;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 160ms var(--ease);
+  --transition-med: 220ms var(--ease);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: "Inter", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+code,
+pre,
+.mono {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+button:focus-visible,
+input:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--accent);
+  color: #0a0a0b;
+}
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.markdown-body {
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.markdown-body > *:first-child {
+  margin-top: 0;
+}
+
+.markdown-body > *:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-body p {
+  margin: 0 0 8px;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  margin: 0 0 8px;
+  padding-left: 20px;
+}
+
+.markdown-body table {
+  border-collapse: collapse;
+  margin: 8px 0;
+  font-size: 13px;
+}
+
+.markdown-body th,
+.markdown-body td {
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  text-align: left;
+}
+
+.markdown-body th {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.markdown-body code {
+  font-size: 12.5px;
+  color: #ff9aa0;
+  background: rgba(229, 105, 111, 0.12);
+  border: 1px solid rgba(229, 105, 111, 0.22);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.markdown-body pre {
+  background: #0d0d0f;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  overflow-x: auto;
+  margin: 8px 0;
+}
+
+.markdown-body pre code {
+  background: none;
+  border: none;
+  color: inherit;
+  padding: 0;
+}
+
+mark.search-hit {
+  background: rgba(229, 105, 111, 0.2);
+  color: #ff9aa0;
+  border: 1px solid rgba(229, 105, 111, 0.45);
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+mark.search-hit.search-hit-active {
+  background: rgba(229, 105, 111, 0.32);
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-elevated);
+  flex-wrap: wrap;
+  row-gap: 8px;
+}
+
+.topbar-title {
+  font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.topbar-group {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.topbar-group-end {
+  margin-left: 0;
+}
+
+.topbar-input {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  border-radius: 6px;
+  padding: 5px 9px;
+  font-size: 13px;
+  transition: border-color var(--transition-fast);
+}
+
+.topbar-input:focus {
+  border-color: var(--accent);
+}
+
+.search-input {
+  width: 170px;
+}
+
+.jump-input {
+  width: 70px;
+}
+
+.search-counter {
+  font-size: 11px;
+  color: var(--text-dim);
+  min-width: 34px;
+}
+
+.topbar-btn,
+.topbar-toggle {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 12px;
+  white-space: nowrap;
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.topbar-btn:hover,
+.topbar-toggle:hover {
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
+.topbar-btn.danger {
+  border-color: rgba(229, 105, 111, 0.4);
+  color: #ff9aa0;
+}
+
+.topbar-btn.danger:hover {
+  border-color: var(--danger);
+  color: #ffd7da;
+}
+
+.topbar-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.topbar-btn:disabled:hover {
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+
+.topbar-toggle.active,
+.topbar-btn.active {
+  background: rgba(79, 179, 201, 0.16);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+@media (min-width: 1180px) {
+  .topbar-group-end {
+    margin-left: auto;
+  }
+}
+
+.statusbar {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 6px 18px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-elevated);
+  font-size: 11.5px;
+  color: var(--text-dim);
+}
+
+.statusbar-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.statusbar-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  transition: background var(--transition-med);
+}
+
+.statusbar-chip.ok .statusbar-dot {
+  background: var(--ok);
+}
+
+.statusbar-chip.err .statusbar-dot {
+  background: var(--danger);
+}
+
+.statusbar-note {
+  color: var(--text-dim);
+}
