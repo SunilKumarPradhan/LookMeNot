@@ -7,3 +7,4 @@ backend/.pytest_cache/
 .vercel/
 .venv/
 *.pyc
+.env*.local
