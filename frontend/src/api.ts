@@ -2,7 +2,6 @@ import type { ChatEntry } from "./types";
 import { ClientParseError, parseCaptureClient, parseTraceClient } from "./clientParser";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
-const BROWSER_PARSE_WARNING = "Parser backend unavailable; parsed JSON in the browser instead.";
 
 export class ApiError extends Error {}
 
@@ -70,7 +69,7 @@ async function parseRawWithFallback(rawData: unknown, sourceKind: ParseResult["s
     const entries = await parseRaw(rawData);
     return { entries, usedBackend: true, sourceKind, warnings: [] };
   } catch {
-    return { entries: parseRawInBrowser(rawData), usedBackend: false, sourceKind, warnings: [BROWSER_PARSE_WARNING] };
+    return { entries: parseRawInBrowser(rawData), usedBackend: false, sourceKind, warnings: [] };
   }
 }
 
@@ -85,7 +84,7 @@ async function parseCapture(inputData: unknown, outputData: unknown | null): Pro
   } catch {
     try {
       const result = parseCaptureClient(inputData, outputData);
-      return { ...result, usedBackend: false, warnings: [BROWSER_PARSE_WARNING, ...result.warnings] };
+      return { ...result, usedBackend: false };
     } catch (exc) {
       throw toApiError(exc, "Could not parse JSON in the browser.");
     }
