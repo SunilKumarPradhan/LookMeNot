@@ -1,9 +1,23 @@
 import type { ChatEntry } from "./types";
 import { ClientParseError, parseCaptureClient, parseTraceClient } from "./clientParser";
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const LOCAL_API_BASE = "http://localhost:8000";
+
+function resolveApiBase(): string {
+  const configuredApiBase = import.meta.env.VITE_API_URL?.trim();
+  if (configuredApiBase) return configuredApiBase.replace(/\/$/, "");
+
+  const hostname = window.location.hostname;
+  return hostname === "localhost" || hostname === "127.0.0.1" ? LOCAL_API_BASE : "";
+}
+
+const API_BASE = resolveApiBase();
 
 export class ApiError extends Error {}
+
+export function hasBackendApi(): boolean {
+  return API_BASE !== "";
+}
 
 export interface ParseResult {
   entries: ChatEntry[];
@@ -13,6 +27,8 @@ export interface ParseResult {
 }
 
 export async function checkHealth(): Promise<boolean> {
+  if (!API_BASE) return false;
+
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 2000);
@@ -25,6 +41,8 @@ export async function checkHealth(): Promise<boolean> {
 }
 
 export async function parseRaw(rawData: unknown): Promise<ChatEntry[]> {
+  if (!API_BASE) throw new ApiError("Parser backend is not configured.");
+
   let res: Response;
   try {
     res = await fetch(`${API_BASE}/parse`, {
@@ -74,6 +92,11 @@ async function parseRawWithFallback(rawData: unknown, sourceKind: ParseResult["s
 }
 
 async function parseCapture(inputData: unknown, outputData: unknown | null): Promise<ParseResult> {
+  if (!API_BASE) {
+    const result = parseCaptureClient(inputData, outputData);
+    return { ...result, usedBackend: false };
+  }
+
   let res: Response;
   try {
     res = await fetch(`${API_BASE}/parse-capture`, {
@@ -186,34 +209,3 @@ export async function parsePastedCapture(inputText: string, outputText: string):
   return parseCapture(inputData, outputData);
 }
 
-export interface SampleLoadResult {
-  entries: ChatEntry[];
-  usedBackend: boolean;
-  sourceKind: ParseResult["sourceKind"];
-  warnings: string[];
-}
-
-export async function loadSample(): Promise<SampleLoadResult> {
-  const backendUp = await checkHealth();
-  const rawRes = await fetch("/sample-raw.json");
-  const rawData = await rawRes.json();
-
-  if (backendUp) {
-    try {
-      const entries = await parseRaw(rawData);
-      return { entries, usedBackend: true, sourceKind: "sample", warnings: [] };
-    } catch {
-      // Fall through to the browser parser, then to the bundled parsed fixture.
-    }
-  }
-
-  try {
-    return { entries: parseRawInBrowser(rawData), usedBackend: false, sourceKind: "sample", warnings: [] };
-  } catch {
-    // Fall through to bundled parsed fixture.
-  }
-
-  const parsedRes = await fetch("/sample-parsed.json");
-  const entries: ChatEntry[] = await parsedRes.json();
-  return { entries, usedBackend: false, sourceKind: "sample", warnings: [] };
-}

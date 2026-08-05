@@ -8,7 +8,7 @@ interface StatusBarProps {
 
 export function StatusBar({ topVisibleIndex, totalEntries, backendOnline, usedBackend, sourceKind }: StatusBarProps) {
   const backendLabel =
-    backendOnline === null ? "Checking optional backend…" : backendOnline ? "Backend connected" : "Browser parser active";
+    backendOnline === null ? "Checking optional backend…" : backendOnline ? "Backend connected" : "Browser parser ready";
   const parserNote = !usedBackend && sourceKind !== "empty"
     ? sourceKind === "sample" ? "sample parsed in browser" : "parsed in browser"
     : null;

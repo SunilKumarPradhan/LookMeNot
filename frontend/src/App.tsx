@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from "react";
 import type { ChatEntry } from "./types";
-import { checkHealth, loadSample, parsePastedCapture, parseUploadedFiles, ApiError } from "./api";
+import { checkHealth, hasBackendApi, parsePastedCapture, parseUploadedFiles, ApiError } from "./api";
 import { useFilters } from "./hooks/useFilters";
 import { useSearch } from "./hooks/useSearch";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
@@ -24,12 +24,12 @@ const SHORTCUTS = [
 
 export default function App() {
   const [entries, setEntries] = useState<ChatEntry[]>([]);
-  const [loadState, setLoadState] = useState<LoadState>("loading");
+  const [loadState, setLoadState] = useState<LoadState>("ready");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [usedBackend, setUsedBackend] = useState(true);
-  const [sourceKind, setSourceKind] = useState<SourceKind>("sample");
+  const [usedBackend, setUsedBackend] = useState(false);
+  const [sourceKind, setSourceKind] = useState<SourceKind>("empty");
   const [warnings, setWarnings] = useState<string[]>([]);
-  const [backendOnline, setBackendOnline] = useState<boolean | null>(null);
+  const [backendOnline, setBackendOnline] = useState<boolean | null>(hasBackendApi() ? null : false);
 
   const [collapseSignal, setCollapseSignal] = useState<CollapseSignal>("auto");
   const [manualOverrides, setManualOverrides] = useState<Set<number>>(new Set());
@@ -53,21 +53,8 @@ export default function App() {
   const search = useSearch(filteredEntries);
 
   useEffect(() => {
-    loadSample()
-      .then(({ entries: loaded, usedBackend: fromBackend, sourceKind: loadedSourceKind, warnings: loadedWarnings }) => {
-        setEntries(loaded);
-        setUsedBackend(fromBackend);
-        setSourceKind(loadedSourceKind);
-        setWarnings(loadedWarnings);
-        setLoadState("ready");
-      })
-      .catch((exc) => {
-        setErrorMessage(exc instanceof Error ? exc.message : "Failed to load sample data");
-        setLoadState("error");
-      });
-  }, []);
+    if (!hasBackendApi()) return;
 
-  useEffect(() => {
     let cancelled = false;
     const poll = () => checkHealth().then((up) => !cancelled && setBackendOnline(up));
     poll();
