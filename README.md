@@ -1,151 +1,228 @@
-# LookMeNot
+# LookMeNot - Open Source Langfuse Trace Visualizer
 
-Turns a raw Langfuse-style agent trace (nested JSON) into a scrollable chat
-thread, so you can debug an agentic workflow by reading it like a
-conversation instead of parsing nested JSON by eye.
+LookMeNot is an open-source Langfuse trace visualizer and browser extension that turns Langfuse traces into a readable conversation view. Use it as a Langfuse trace viewer for AI agent debugging, tool call inspection, tool result analysis, thinking blocks, observations, and long LLM workflows without digging through nested JSON.
 
-**Content over metrics.** There are no tokens, cost, or latency numbers
-anywhere in this app — only the actual text, thinking, tool calls, and tool
-results, in order.
+It is privacy-first and built for developers who need to understand what an agent actually did.
 
-## Architecture
+## Keywords
 
-Two tiers, talking over one JSON contract:
+Langfuse trace visualizer, Langfuse trace viewer, Langfuse browser extension, AI agent trace viewer, LLM trace visualizer, tool call debugger, agent observability, Langfuse debugging, conversation view for traces.
 
-- **`backend/`** — a pure-function Python parser (`parse.py`) that flattens
-  a raw Langfuse-shaped trace into a flat array of "entries" (one per
-  content block), wrapped in a small FastAPI app (`server.py`) exposing it
-  over HTTP. Also runnable as a CLI.
-- **`frontend/`** — a Vite + React + TypeScript app that renders that flat
-  array as chat bubbles. It never sees the raw Langfuse shape — only the
-  parsed contract below.
+## Why Use It
 
-```
-design-6-chat-thread/
-├── Makefile                  # single-command bring-up
-├── sample-raw.json           # example raw Langfuse-style trace
-├── sample-parsed.json        # exact expected flattened output for it
-├── scripts/
-│   └── generate_stress_trace.py  # perf-test fixture generator (~1200 entries)
-├── backend/
-│   ├── parse.py               # the parser (pure functions + CLI)
-│   ├── server.py               # FastAPI wrapper
-│   └── requirements.txt
-└── frontend/
-    ├── src/
-    │   ├── api.ts              # 3-tier load fallback (see below)
-    │   ├── types.ts             # ChatEntry contract
-    │   ├── App.tsx               # top-level state owner
-    │   ├── hooks/                # useFilters, useSearch, useKeyboardShortcuts
-    │   └── components/           # ChatWindow, TopBar, StatusBar, bubbles
-    └── public/
-        ├── sample-raw.json
-        └── sample-parsed.json
+- Read Langfuse traces as a clean chat-style timeline.
+- Inspect tool calls and tool results without expanding raw JSON by hand.
+- Visualize AI agent traces, LLM conversations, observations, and agent actions in chronological order.
+- Search across messages, tool names, tool inputs, and outputs.
+- Filter thinking blocks, tool calls, and tool results.
+- Upload or paste trace JSON when automatic capture is not available.
+- Run locally in your browser. No analytics, no remote parser, no trace data sent to LookMeNot servers.
+
+## Use Cases
+
+- Debug Langfuse traces from agentic workflows.
+- Review tool calls and tool results from LLM apps.
+- Share a readable trace view with teammates without exposing a dashboard account.
+- Inspect long conversations and observations from Langfuse Cloud or self-hosted Langfuse.
+- Compare raw trace JSON with a human-readable conversation timeline.
+
+## Fastest Start On Windows
+
+Run this in PowerShell:
+
+```powershell
+irm https://raw.githubusercontent.com/SunilKumarPradhan/LookMeNot/main/scripts/get-lookmenot.ps1 | iex
 ```
 
-## Quickstart
+The script downloads the latest source from GitHub, asks which browser you use, builds the right package, and opens the output folder.
 
+Supported choices:
+
+- Chrome
+- Brave
+- Edge
+- Firefox
+
+Safari is not included yet because Safari extension packaging requires macOS, Xcode, and a separate Apple distribution flow.
+
+## Manual Extension Build
+
+Use this if you prefer to inspect the code before running scripts:
+
+```powershell
+git clone https://github.com/SunilKumarPradhan/LookMeNot.git
+cd LookMeNot\extension-web
+npm install
+npm run get-package
 ```
+
+The package picker asks for your browser and writes files under:
+
+```text
+extension-web/dist-packages/
+```
+
+Each browser folder includes an `INSTALL.txt` with the exact next steps.
+
+## Browser Packages
+
+Chromium browsers use an unpacked extension folder for local install and a ZIP for store submission:
+
+```text
+extension-web/dist-packages/chrome/
+extension-web/dist-packages/brave/
+extension-web/dist-packages/edge/
+extension-web/dist-packages/chromium/
+```
+
+Firefox uses a Mozilla Add-ons-ready ZIP:
+
+```text
+extension-web/dist-packages/firefox/LOOKMENOT-FIREFOX-ADDON-NO-WARNINGS-UPLOAD-THIS.zip
+```
+
+The Firefox package has been checked with Mozilla's add-on linter with 0 errors, 0 warnings, and 0 notices.
+
+## What LookMeNot Shows
+
+LookMeNot focuses on content, not billing dashboards. It renders:
+
+- User and assistant messages
+- Thinking blocks
+- Tool calls
+- Tool results
+- System notices
+- Unknown or malformed blocks as safe warning entries
+
+It deliberately avoids sending trace content anywhere. Trace data stays in the browser tab or in local files you choose to load.
+
+## Repository Layout
+
+```text
+LookMeNot/
++-- backend/              # Python parser and FastAPI wrapper
++-- frontend/             # Standalone demo viewer
++-- extension-web/        # Browser extension source and packaging scripts
++-- scripts/              # Repo-level helper scripts
++-- sample-raw.json       # Example Langfuse-style trace
++-- sample-parsed.json    # Expected flattened output
+```
+
+## Local Development
+
+Install everything for the backend and demo frontend:
+
+```powershell
 make install
 make up
 ```
 
-Brings up the backend (`uvicorn`, port 8000) and frontend (`vite`, port
-5173) together; `Ctrl+C` stops both. Run `make install` first to install
-both sets of dependencies (`python3 -m pip install ...` for the backend,
-`npm install` in `frontend/`).
+If `make` is not available on Windows, run the pieces manually:
 
-`make` isn't preinstalled on stock Windows — if you don't have it, run the
-two steps it wraps by hand instead:
-
-```
-python3 -m pip install --user --break-system-packages -r backend/requirements.txt
-cd frontend && npm install
-
-# then, in two terminals:
-cd backend  && python3 -m uvicorn server:app --reload --port 8000
-cd frontend && npm run dev
+```powershell
+python -m pip install -r backend/requirements.txt
+cd frontend
+npm install
+npm run dev
 ```
 
-The frontend works even with the backend down: it falls back to a bundled
-pre-parsed sample and to direct upload of already-parsed JSON (see below).
+In another terminal, run the backend:
 
-## The parsed entry contract
+```powershell
+cd backend
+python -m uvicorn server:app --reload --port 8000
+```
+
+Develop the browser extension:
+
+```powershell
+cd extension-web
+npm install
+npm run build
+npm run get-package
+```
+
+## Parser Contract
+
+The backend flattens raw Langfuse-shaped traces into entries like this:
 
 ```ts
 interface ChatEntry {
-  index: number;        // strictly monotonic, global position
+  index: number;
   role: "user" | "assistant" | "tool" | "system";
   type: "text" | "thinking" | "tool_use" | "tool_result" | "unknown";
   text: string;
-  tool?: string;         // tool name, for tool_use / tool_result
-  toolInput?: string;    // stringified input, for tool_use
+  tool?: string;
+  toolInput?: string;
   toolInputRaw?: unknown;
   toolUseId?: string;
-  isError?: boolean;     // for tool_result
-  messageIndex: number;  // which source message this block came from
-  rawRole: string;       // the role Langfuse actually gave this block
+  isError?: boolean;
+  messageIndex: number;
+  rawRole: string;
 }
 ```
 
-One entry per content block — a message with three content blocks becomes
-three entries, in order.
+One content block becomes one entry. Langfuse often nests `tool_result` blocks inside messages with `role: "user"`; LookMeNot normalizes those entries to `role: "tool"` while preserving the original role in `rawRole`.
 
-### The `tool_result`-as-`"user"` quirk
+## Tests
 
-Langfuse nests `tool_result` blocks inside messages with `role: "user"`.
-That's a schema quirk, not the true origin of the content, so the parser
-**forces `role: "tool"`** on any `tool_result` entry while preserving the
-original value in `rawRole` for verification. Click "copy raw" on any
-bubble to see both.
+Run parser tests:
 
-### Other parsing rules
+```powershell
+cd backend
+python -m pytest
+```
 
-- `tool_use_id → tool name` is resolved by tracking every `tool_use` block
-  seen so far; an unmatched `tool_result` (out-of-order or truncated trace)
-  gets `tool: "unknown"` rather than failing.
-- A message that fails to parse doesn't abort the whole trace — it's
-  replaced with a single `unknown`-typed error entry and parsing continues.
-- Bare strings inside a `content` array are wrapped as text blocks; a
-  missing/malformed `content` becomes an empty block list.
+Run the extension build:
 
-## Frontend behavior
+```powershell
+cd extension-web
+npm run build
+```
 
-- **3-tier data loading**: upload a raw trace → parsed via the backend →
-  rendered; if the backend is unreachable, upload an already-parsed JSON
-  array directly; on first load with nothing uploaded, falls back to the
-  bundled `sample-raw.json` (parsed via the backend if it's up) or
-  `sample-parsed.json` (if it's not).
-- **Six bubble treatments**: user/assistant text (left/right, markdown +
-  GFM + syntax highlighting), thinking (dashed, italic, collapsible),
-  tool_use (right-aligned card), tool_result (left-aligned card, green/red
-  by `isError`, collapsible past ~400 chars), system notices (centered
-  pill), unknown blocks (dashed warning card, raw text shown as-is).
-- **Filters** for thinking / tool_use / tool_result visibility, plus a
-  reading mode that shows only `text` entries — persisted to
-  `localStorage`.
-- **Search** across text/tool name/tool input, with hit count and
-  next/prev navigation; **jump to index** by number or by clicking any
-  entry's `#N` tag, which scrolls to and briefly flashes that entry.
-- **Expand/collapse all**, overridable per-bubble.
-- **Keyboard shortcuts**: `/` search, `g` jump, `n`/`N` next/prev hit, `r`
-  reading mode, `Esc` clear/close, `?` shortcuts cheatsheet.
-- **Virtualized scrolling** (`@tanstack/react-virtual`) — smooth with
-  large traces; see `scripts/generate_stress_trace.py` for a ~1200-entry
-  stress fixture (already generated at `scripts/stress-raw.json` /
-  `stress-parsed.json`, and verified to parse identically via the CLI and
-  the API).
-- Dark mode only; all transitions are always smoothly animated.
+Run Firefox package validation locally:
 
-One disclosed simplification versus a literal reading of "highlight
-matched substrings inside bubbles": search matches highlight the **whole
-bubble** (an outline treatment) rather than injecting `<mark>` into
-markdown-rendered text, since the latter would require `rehype-raw` +
-`rehype-sanitize` (an XSS-surface tradeoff) for what's otherwise a purely
-cosmetic difference.
+```powershell
+cd extension-web
+npm run package:firefox
+npx addons-linter "dist-packages/firefox/LOOKMENOT-FIREFOX-ADDON-NO-WARNINGS-UPLOAD-THIS.zip"
+```
 
-## Out of scope (explicit)
+## Privacy
 
-No automated test suite and no dedicated accessibility work (ARIA audit,
-contrast checks, `prefers-reduced-motion`) — both excluded per direction
-for this build.
+LookMeNot processes trace content locally. The extension does not include analytics, telemetry, advertising, a remote parser backend, or third-party trace data transfer.
+
+Permissions are used to detect Langfuse pages, inject the reader after a user action, and render trace content inside the active browser tab.
+
+## Contributing
+
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, checks, and pull request guidance.
+
+Use GitHub Issues for support, bugs, and feature requests:
+
+https://github.com/SunilKumarPradhan/LookMeNot/issues
+
+## GitHub Discovery
+
+Recommended repository description:
+
+```text
+Open-source Langfuse trace visualizer and browser extension for AI agent debugging, tool calls, tool results, and LLM trace inspection.
+```
+
+Recommended GitHub topics:
+
+```text
+langfuse, langfuse-trace-viewer, langfuse-visualizer, ai-agent-debugging, llm-observability, trace-viewer, browser-extension, chrome-extension, firefox-extension, developer-tools
+```
+
+## Roadmap
+
+- GitHub Releases with prebuilt browser packages.
+- Screenshots and short demo clips.
+- More parser fixtures for real-world Langfuse edge cases.
+- Safari support as a future macOS/Xcode-specific track.
+
+## License
+
+LookMeNot is released under the [MIT License](LICENSE).

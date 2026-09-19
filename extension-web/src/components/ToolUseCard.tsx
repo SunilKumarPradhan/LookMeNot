@@ -1,0 +1,26 @@
+import { Wrench } from "lucide-react";
+import { EntryMeta } from "./EntryMeta";
+import { HighlightedText } from "./HighlightedText";
+import { bubbleClassNames, type BubbleCommonProps } from "./bubbleShared";
+
+export function ToolUseCard({ entry, searchQuery, isSearchHit, isActiveHit, flash, onFocusIndex }: BubbleCommonProps) {
+  return (
+    <div className="chat-row align-right">
+      <div className="bubble-col align-right-col">
+        <div className={bubbleClassNames("bubble tool-use", { isSearchHit, isActiveHit, flash })}>
+          <div className="bubble-header">
+            <Wrench size={14} aria-hidden="true" />
+            <span>Tool call</span>
+            <strong>
+              <HighlightedText text={entry.tool ?? "unknown"} query={searchQuery} />
+            </strong>
+          </div>
+          <pre className="mono">
+            <HighlightedText text={entry.toolInput ?? ""} query={searchQuery} />
+          </pre>
+        </div>
+        <EntryMeta entry={entry} onFocusIndex={onFocusIndex} />
+      </div>
+    </div>
+  );
+}

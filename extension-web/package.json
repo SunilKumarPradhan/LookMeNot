@@ -1,0 +1,39 @@
+{
+  "name": "lookmenot-extension-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Open-source Langfuse trace visualizer browser extension for AI agent debugging and LLM trace inspection.",
+  "keywords": [
+    "langfuse",
+    "langfuse-trace-viewer",
+    "langfuse-visualizer",
+    "trace-viewer",
+    "ai-agent-debugging",
+    "llm-observability",
+    "browser-extension",
+    "chrome-extension",
+    "firefox-extension",
+    "developer-tools"
+  ],
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "tsc -b && vite build",
+    "package": "npm run build && powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-extension.ps1",
+    "package:firefox": "npm run build && powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-firefox.ps1",
+    "get-package": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/get-browser-package.ps1"
+  },
+  "dependencies": {
+    "@tanstack/react-virtual": "^3.10.8",
+    "lucide-react": "^0.468.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "typescript": "^5.6.2",
+    "vite": "^8.3.0"
+  }
+}

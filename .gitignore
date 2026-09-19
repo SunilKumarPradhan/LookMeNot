@@ -2,6 +2,12 @@ frontend/node_modules/
 frontend/dist/
 frontend/.vercel/
 frontend/tsconfig.tsbuildinfo
+extension-web/node_modules/
+extension-web/dist/
+extension-web/dist-firefox/
+extension-web/dist-packages/
+extension-web/tsconfig.tsbuildinfo
+extension-web/*.zip
 backend/__pycache__/
 backend/.pytest_cache/
 .vercel/
