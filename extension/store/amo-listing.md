@@ -48,7 +48,12 @@ LookMeNot is an independent project. It is not made by, affiliated with or endor
 
 ## Version Notes (0.2.0)
 
-Initial public release. Local Langfuse trace reader pane, automatic opening on Langfuse Cloud, toolbar activation for self-hosted Langfuse, JSON upload/paste, search, filters and expandable tool cards.
+Permissions and build cleanup over 0.1.0:
+- Host permission narrowed from all of langfuse.com to https://*.cloud.langfuse.com/* only; removed the *://* web_accessible_resources entry.
+- Page bridge now only reads same-origin Langfuse API/trace responses and posts them to the page's own origin, not "*".
+- Removed the 4.5s page-scan polling loop, the document.body.innerText read, and writing reader filters into the page's localStorage; the pane now scans once on load and again only on DOM changes, never while the tab is hidden.
+- Build is now reproducible from the uploaded source archive with no post-build patching step.
+- New icon (legible at 16px) and updated listing copy; functionality (trace reading, search, filters, JSON upload/paste, self-hosted toolbar activation) is unchanged.
 
 ## Notes To Reviewer
 
