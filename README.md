@@ -1,150 +1,67 @@
-# LookMeNot - Open Source Langfuse Trace Visualizer
+<div align="center">
+  <img src=".github/social-preview.png" alt="LookMeNot" width="640">
+</div>
 
-LookMeNot is an open-source Langfuse trace visualizer and browser extension that turns Langfuse traces into a readable conversation view. Use it as a Langfuse trace viewer for AI agent debugging, tool call inspection, tool result analysis, thinking blocks, observations, and long LLM workflows without digging through nested JSON.
+<div align="center">
 
-It is privacy-first and built for developers who need to understand what an agent actually did.
+[![License: MIT](https://img.shields.io/github/license/SunilKumarPradhan/LookMeNot)](LICENSE)
+[![Last commit](https://img.shields.io/github/last-commit/SunilKumarPradhan/LookMeNot)](https://github.com/SunilKumarPradhan/LookMeNot/commits/main)
+[![Issues](https://img.shields.io/github/issues/SunilKumarPradhan/LookMeNot)](https://github.com/SunilKumarPradhan/LookMeNot/issues)
 
-## Keywords
+</div>
 
-Langfuse trace visualizer, Langfuse trace viewer, Langfuse browser extension, AI agent trace viewer, LLM trace visualizer, tool call debugger, agent observability, Langfuse debugging, conversation view for traces.
+# LookMeNot
 
-## Why Use It
+A browser extension that renders a Langfuse trace as a conversation — messages, tool calls, tool results, and thinking blocks in order — instead of a tree of nested JSON. It opens as a side pane over the Langfuse UI, reads trace data already on the page, and never sends that data anywhere else.
 
-- Read Langfuse traces as a clean chat-style timeline.
-- Inspect tool calls and tool results without expanding raw JSON by hand.
-- Visualize AI agent traces, LLM conversations, observations, and agent actions in chronological order.
-- Search across messages, tool names, tool inputs, and outputs.
-- Filter thinking blocks, tool calls, and tool results.
-- Upload or paste trace JSON when automatic capture is not available.
-- Run locally in your browser. No analytics, no remote parser, no trace data sent to LookMeNot servers.
+Unofficial project. Not affiliated with or endorsed by Langfuse.
 
-## Use Cases
+## Install
 
-- Debug Langfuse traces from agentic workflows.
-- Review tool calls and tool results from LLM apps.
-- Share a readable trace view with teammates without exposing a dashboard account.
-- Inspect long conversations and observations from Langfuse Cloud or self-hosted Langfuse.
-- Compare raw trace JSON with a human-readable conversation timeline.
-
-## Fastest Start On Windows
-
-Run this in PowerShell:
+**PowerShell (Windows, Chrome or Edge):**
 
 ```powershell
-irm https://raw.githubusercontent.com/SunilKumarPradhan/LookMeNot/main/scripts/get-lookmenot.ps1 | iex
+irm https://raw.githubusercontent.com/SunilKumarPradhan/LookMeNot/main/scripts/install.ps1 | iex
 ```
 
-The script downloads the latest source from GitHub, asks which browser you use, builds the right package, and opens the output folder.
+Downloads the latest build, unpacks it to `%LOCALAPPDATA%\LookMeNot`, and opens your browser's extensions page with the folder path copied to your clipboard. Chrome and Edge don't allow a browser extension to install itself outside their stores — that's a deliberate security boundary, not a limitation of this script — so two clicks stay manual: turn on **Developer mode**, then **Load unpacked** and paste the path. See [scripts/install.ps1](scripts/install.ps1) if you want to read it before running it.
 
-Supported choices:
+**From source (any OS):**
 
-- Chrome
-- Brave
-- Edge
-- Firefox
-
-Safari is not included yet because Safari extension packaging requires macOS, Xcode, and a separate Apple distribution flow.
-
-## Manual Extension Build
-
-Use this if you prefer to inspect the code before running scripts:
-
-```powershell
+```bash
 git clone https://github.com/SunilKumarPradhan/LookMeNot.git
-cd LookMeNot\extension-web
-npm install
-npm run get-package
+cd LookMeNot/extension
+npm ci
+npm run build:firefox   # or: npm run build:chrome
 ```
 
-The package picker asks for your browser and writes files under:
+Then load `extension/dist/firefox/manifest.json` (Firefox: `about:debugging#/runtime/this-firefox` → Load Temporary Add-on) or `extension/dist/chrome` (Chrome/Edge: `chrome://extensions` → Developer mode → Load unpacked).
 
-```text
-extension-web/dist-packages/
-```
+**Store listings:** the [extension](extension/) is built and ready for the Firefox, Chrome, and Edge stores; submission is tracked in [extension/PUBLISHING.md](extension/PUBLISHING.md). Once live, this section will carry direct install links.
 
-Each browser folder includes an `INSTALL.txt` with the exact next steps.
+## What it does
 
-## Browser Packages
+- Opens automatically on `*.cloud.langfuse.com`, or on a self-hosted Langfuse page via the toolbar button.
+- Reads trace JSON the page already loaded — from its own API responses or embedded page data — and renders messages, thinking blocks, tool calls, and tool results as a timeline.
+- Search, per-type filters, expand/collapse, and jump-to-entry for long traces.
+- Manual JSON upload or paste, for traces the page doesn't expose automatically.
+- Everything stays in the tab: no server, no analytics, no stored data.
 
-Chromium browsers use an unpacked extension folder for local install and a ZIP for store submission:
-
-```text
-extension-web/dist-packages/chrome/
-extension-web/dist-packages/brave/
-extension-web/dist-packages/edge/
-extension-web/dist-packages/chromium/
-```
-
-Firefox uses a Mozilla Add-ons-ready ZIP:
-
-```text
-extension-web/dist-packages/firefox/LOOKMENOT-FIREFOX-ADDON-NO-WARNINGS-UPLOAD-THIS.zip
-```
-
-The Firefox package has been checked with Mozilla's add-on linter with 0 errors, 0 warnings, and 0 notices.
-
-## What LookMeNot Shows
-
-LookMeNot focuses on content, not billing dashboards. It renders:
-
-- User and assistant messages
-- Thinking blocks
-- Tool calls
-- Tool results
-- System notices
-- Unknown or malformed blocks as safe warning entries
-
-It deliberately avoids sending trace content anywhere. Trace data stays in the browser tab or in local files you choose to load.
-
-## Repository Layout
+## Repository layout
 
 ```text
 LookMeNot/
-+-- backend/              # Python parser and FastAPI wrapper
-+-- frontend/             # Standalone demo viewer
-+-- extension-web/        # Browser extension source and packaging scripts
-+-- scripts/              # Repo-level helper scripts
-+-- sample-raw.json       # Example Langfuse-style trace
-+-- sample-parsed.json    # Expected flattened output
+├─ extension/    Browser extension — source, build, store listings, publishing guide
+├─ backend/      Python parser (Langfuse-shaped JSON → ChatEntry[]) + FastAPI wrapper
+├─ frontend/     Standalone React viewer that exercises the same parser contract
+└─ scripts/      install.ps1, and a stress-test trace generator for the parser
 ```
 
-## Local Development
+The extension is self-contained: its own `src/`, its own parser, its own build. `backend/` and `frontend/` are a second, independent implementation of the same idea as a web app — useful for testing the parser contract without a browser.
 
-Install everything for the backend and demo frontend:
+## Parser contract
 
-```powershell
-make install
-make up
-```
-
-If `make` is not available on Windows, run the pieces manually:
-
-```powershell
-python -m pip install -r backend/requirements.txt
-cd frontend
-npm install
-npm run dev
-```
-
-In another terminal, run the backend:
-
-```powershell
-cd backend
-python -m uvicorn server:app --reload --port 8000
-```
-
-Develop the browser extension:
-
-```powershell
-cd extension-web
-npm install
-npm run build
-npm run get-package
-```
-
-## Parser Contract
-
-The backend flattens raw Langfuse-shaped traces into entries like this:
+Both implementations flatten a raw Langfuse-shaped trace into a flat list of entries:
 
 ```ts
 interface ChatEntry {
@@ -162,67 +79,33 @@ interface ChatEntry {
 }
 ```
 
-One content block becomes one entry. Langfuse often nests `tool_result` blocks inside messages with `role: "user"`; LookMeNot normalizes those entries to `role: "tool"` while preserving the original role in `rawRole`.
+One content block becomes one entry. Langfuse often nests `tool_result` blocks inside messages with `role: "user"`; both parsers normalize those entries to `role: "tool"` and keep the original role in `rawRole`.
 
-## Tests
-
-Run parser tests:
+## Development
 
 ```powershell
+# Extension
+cd extension
+npm ci
+npm run build:firefox
+npm run lint:firefox     # Mozilla's add-on linter — expect 0 errors, 2 warnings (see extension/README.md)
+
+# Backend parser tests
 cd backend
 python -m pytest
-```
 
-Run the extension build:
-
-```powershell
-cd extension-web
-npm run build
-```
-
-Run Firefox package validation locally:
-
-```powershell
-cd extension-web
-npm run package:firefox
-npx addons-linter "dist-packages/firefox/LOOKMENOT-FIREFOX-ADDON-NO-WARNINGS-UPLOAD-THIS.zip"
+# Standalone web viewer
+make install && make up          # or, without make: see CONTRIBUTING.md
 ```
 
 ## Privacy
 
-LookMeNot processes trace content locally. The extension does not include analytics, telemetry, advertising, a remote parser backend, or third-party trace data transfer.
-
-Permissions are used to detect Langfuse pages, inject the reader after a user action, and render trace content inside the active browser tab.
+Trace content is processed in the browser tab. The extension makes no network requests of its own, has no analytics, telemetry, or remote code, and stores nothing. Details: [extension/store/privacy-policy.md](extension/store/privacy-policy.md).
 
 ## Contributing
 
-Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, checks, and pull request guidance.
-
-Use GitHub Issues for support, bugs, and feature requests:
-
-https://github.com/SunilKumarPradhan/LookMeNot/issues
-
-## GitHub Discovery
-
-Recommended repository description:
-
-```text
-Open-source Langfuse trace visualizer and browser extension for AI agent debugging, tool calls, tool results, and LLM trace inspection.
-```
-
-Recommended GitHub topics:
-
-```text
-langfuse, langfuse-trace-viewer, langfuse-visualizer, ai-agent-debugging, llm-observability, trace-viewer, browser-extension, chrome-extension, firefox-extension, developer-tools
-```
-
-## Roadmap
-
-- GitHub Releases with prebuilt browser packages.
-- Screenshots and short demo clips.
-- More parser fixtures for real-world Langfuse edge cases.
-- Safari support as a future macOS/Xcode-specific track.
+See [CONTRIBUTING.md](CONTRIBUTING.md). Issues and feature requests: [GitHub Issues](https://github.com/SunilKumarPradhan/LookMeNot/issues).
 
 ## License
 
-LookMeNot is released under the [MIT License](LICENSE).
+[MIT](LICENSE)

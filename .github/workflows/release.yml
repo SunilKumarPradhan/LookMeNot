@@ -1,0 +1,46 @@
+name: Release extension
+
+# Tag push, e.g.:
+#   git tag extension-v0.2.0
+#   git push origin extension-v0.2.0
+# builds the extension and attaches the Firefox, Chrome, and source zips to a
+# GitHub Release. scripts/install.ps1 downloads the *-chrome.zip asset from
+# whichever release GitHub reports as "latest".
+on:
+  push:
+    tags:
+      - "extension-v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: extension
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: extension/package-lock.json
+      - run: npm ci
+      - run: npm run package:firefox
+      - run: npm run package:chrome
+      - run: npm run package:source
+      - name: Verify the version tag matches package.json
+        run: |
+          PKG_VERSION="v$(node -p "require('./package.json').version")"
+          TAG_VERSION="${GITHUB_REF_NAME#extension-}"
+          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+            echo "Tag $TAG_VERSION does not match package.json version $PKG_VERSION" >&2
+            exit 1
+          fi
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: extension/artifacts/*.zip
+          generate_release_notes: true

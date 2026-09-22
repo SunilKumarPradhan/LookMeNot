@@ -1,0 +1,49 @@
+{
+  "manifest_version": 3,
+  "name": "LookMeNot - Trace Reader for Langfuse",
+  "short_name": "LookMeNot",
+  "version": "0.0.0",
+  "description": "Read Langfuse traces, tool calls, and agent actions as a conversation in a side pane. Runs locally; nothing leaves your browser.",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "permissions": ["activeTab", "scripting"],
+  "host_permissions": ["https://*.cloud.langfuse.com/*"],
+  "action": {
+    "default_title": "Open LookMeNot",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png"
+    }
+  },
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.cloud.langfuse.com/*"],
+      "js": ["page-bridge.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["https://*.cloud.langfuse.com/*"],
+      "js": ["assets/content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "@lookmenot-langfuse-trace-reader",
+      "strict_min_version": "140.0",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    },
+    "gecko_android": {
+      "strict_min_version": "142.0"
+    }
+  }
+}

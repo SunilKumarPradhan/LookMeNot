@@ -22,9 +22,9 @@ make up
 Browser extension:
 
 ```powershell
-cd extension-web
-npm install
-npm run get-package
+cd extension
+npm ci
+npm run build:firefox
 ```
 
 If `make` is not available on Windows, use the manual commands in the README.
@@ -38,14 +38,15 @@ cd backend
 python -m pytest
 ```
 
-Run the extension build:
+Type-check, build, and lint the extension:
 
 ```powershell
-cd extension-web
-npm run build
+cd extension
+npm run build:firefox
+npm run lint:firefox
 ```
 
-Before opening a pull request, run the smallest check that covers your change. If you change extension packaging, also test `npm run get-package` for the affected browser.
+Before opening a pull request, run the smallest check that covers your change. If you change extension packaging, also run `npm run package:firefox` (and `npm run package:chrome`) and check the zip in `extension/artifacts/`.
 
 ## Pull Requests
 

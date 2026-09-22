@@ -1,0 +1,35 @@
+{
+  "name": "lookmenot-extension",
+  "private": true,
+  "version": "0.2.0",
+  "type": "module",
+  "description": "Open-source Langfuse trace reader browser extension for AI agent debugging and LLM trace inspection.",
+  "license": "MIT",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "scripts": {
+    "typecheck": "tsc -b",
+    "build:firefox": "tsc -b && node scripts/build.mjs firefox",
+    "build:chrome": "tsc -b && node scripts/build.mjs chrome",
+    "lint:firefox": "web-ext lint --source-dir dist/firefox",
+    "package:firefox": "npm run build:firefox && npm run lint:firefox && web-ext build --source-dir dist/firefox --artifacts-dir artifacts --filename lookmenot-{version}-firefox.zip --overwrite-dest",
+    "package:chrome": "npm run build:chrome && web-ext build --source-dir dist/chrome --artifacts-dir artifacts --filename lookmenot-{version}-chrome.zip --overwrite-dest",
+    "package:source": "node scripts/package-source.mjs"
+  },
+  "dependencies": {
+    "@tanstack/react-virtual": "^3.10.8",
+    "lucide-react": "^0.468.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "adm-zip": "^0.6.1",
+    "typescript": "^5.6.2",
+    "vite": "^8.3.0",
+    "web-ext": "^10.6.0"
+  }
+}
