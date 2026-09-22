@@ -3,13 +3,15 @@
 Policies: https://extensionworkshop.com/documentation/publish/add-on-policies/
 Publisher resources: https://extensionworkshop.com/documentation/manage/resources-for-publishers/
 
-## 0. Find out why the last submission was rejected
+## 0. If a submission gets rejected
 
 The public page `addons.mozilla.org/firefox/addon/<slug>/` returns "Oops! We can't find that page" for any add-on that is not public (rejected, disabled, unlisted or still in review), so it does not tell you the reason.
 
 1. Open https://addons.mozilla.org/developers/addons and sign in.
 2. Open the add-on -> Manage Status & Versions -> the rejected version. Read the reviewer comment there. The same text is emailed to the account address.
 3. Fix exactly what it says, in addition to the checklist below.
+
+(v0.1.0 of this add-on went through this loop once and was later approved.)
 
 ## 1. Pre-flight checklist
 
@@ -68,7 +70,7 @@ Case B - the add-on was deleted, or you want a fresh listing:
 | Policy | How LookMeNot complies |
 | --- | --- |
 | No remote code | Everything ships in the package; no `fetch`, no external scripts. |
-| No obfuscation; minified code needs source | `assets/content.js` is a plain Vite minified bundle. Source zip rebuilds it byte for byte with `npm ci && npm run build:firefox`. No post-build patching. |
+| No obfuscation; minified code needs source | `assets/content.js` is a plain Vite minified bundle. Source zip rebuilds it byte for byte with `npm ci && npm run build:firefox`. No post-build patching, including of the two `UNSAFE_VAR_ASSIGNMENT` lint warnings (react-dom's own `dangerouslySetInnerHTML` internals, unreachable from this extension's code, see extension/README.md) — patching those to silence the linter would itself be exactly this kind of obfuscation, so this build doesn't do it. |
 | Only release versions of libraries | React 18.3, react-dom, lucide-react, @tanstack/react-virtual from npm, pinned by lock file, unmodified. |
 | Minimal permissions | `activeTab`, `scripting`, and `https://*.cloud.langfuse.com/*`. No `<all_urls>`, no `web_accessible_resources`. |
 | Data collection disclosure | `data_collection_permissions.required = ["none"]`; nothing leaves the tab; privacy policy matches. |

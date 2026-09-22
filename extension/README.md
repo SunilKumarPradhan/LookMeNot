@@ -46,7 +46,9 @@ npm run package:source    # artifacts/lookmenot-<version>-source.zip (upload wit
 ```
 
 `npm run lint:firefox` runs Mozilla's official linter (`web-ext lint`) on `dist/firefox`.
-Expected result: 0 errors, 2 warnings. Both warnings are `UNSAFE_VAR_ASSIGNMENT` inside the bundled React DOM runtime (a fixed `<script>` probe string and its `dangerouslySetInnerHTML` helper). LookMeNot's own code never assigns to `innerHTML` and never uses `dangerouslySetInnerHTML`.
+Expected result: 0 errors, 2 warnings, both `UNSAFE_VAR_ASSIGNMENT` on `assets/content.js` line 5 (columns ~6172 and ~6230 of the minified line). Both are inside react-dom's own bundled implementation of `dangerouslySetInnerHTML` (the SVG-namespace branch) — code that ships because it's part of the `react-dom` package, not because this extension calls it. `grep -rn "innerHTML\|dangerouslySetInnerHTML" src/` returns nothing: this extension's own code never sets `innerHTML` and never uses `dangerouslySetInnerHTML`, so that branch is unreachable here.
+
+These two warnings cannot be removed without either dropping `dangerouslySetInnerHTML` support from react-dom itself (not something a downstream package can selectively strip) or rewriting the bundled vendor code to defeat the linter's pattern match — the second option was considered and rejected: rewriting `x.innerHTML = y` into an equivalent that doesn't match the linter's rule (e.g. bracket-notation `x["innerHTML"]`) is exactly the kind of code-hides-its-own-purpose obfuscation Mozilla's add-on policy prohibits, so this build does not do it. AMO's validation already treats this as 0 errors; the warnings are informational.
 
 ## Try it in Firefox
 

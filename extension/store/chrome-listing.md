@@ -30,7 +30,7 @@ Display Langfuse trace data as a readable conversation, including messages, tool
 
 ## Remote Code Declaration
 
-No remote code is executed. All JavaScript ships in the extension package.
+No remote code is executed. All JavaScript ships in the extension package. `assets/content.js` is a standard Vite production bundle (React 18, lucide-react, @tanstack/react-virtual) minified for size only; `background.js` and `page-bridge.js` are unminified. Reproducible from source: `npm ci && npm run build:chrome` in `extension/` produces this exact `dist/chrome/`.
 
 ## Data Use Disclosure
 
